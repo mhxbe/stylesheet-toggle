@@ -1,4 +1,4 @@
-(function () {
+(function (d) {
   'use strict';
 
   var ui,
@@ -12,7 +12,7 @@
   // Helper Funtctions
 
   function createUI() {
-    var div = document.createElement('div');
+    var div = d.createElement('div');
     div.className = 'my-ui';
     div.style.minWidth = '150px';
     div.style.padding = '4px';
@@ -23,15 +23,38 @@
     div.style.color = 'white';
 
     // Text
-    div.innerHTML = '<h2>Stylesheets:</2><ul class=\'stylesheet-list\'><ul>';
+    div.innerHTML = '<h2>Stylesheets:</2><ul class=\'stylesheet-list\'></ul><button id=\'add-stylesheet\' type=\'button\'>Add stylesheet</button>';
 
-    document.querySelector('body').appendChild(div);
-
+    d.querySelector('body').appendChild(div);
+    requestStylesheetUrl();
     getCurrentStylesheets();
   }
 
+  function requestStylesheetUrl() {
+    var addStylesheetButton = d.querySelector('#add-stylesheet');
+    addStylesheetButton.onclick = function (e) {
+      var linkToNewStylesheet = window.prompt('Add link to stylesheet');
+      addStylesheet(linkToNewStylesheet);
+    }
+  }
+
+  function addStylesheet(url) {
+    var stylesheetTag = 'link';
+    stylesheetTag = d.createElement(stylesheetTag);
+    stylesheetTag.rel = 'stylesheet';
+    stylesheetTag.href = url;
+    var newStylesheet = {
+      fileName: url,
+      visible: true,
+      file: stylesheetTag
+    };
+    styleObjects.push(newStylesheet);
+    printCurrentStylesheets();
+    addStyling();
+  }
+
   function getCurrentStylesheets() {
-    var s = document.querySelectorAll('link[rel=stylesheet]');
+    var s = d.querySelectorAll('link[rel=stylesheet]');
     [].slice.call(s).forEach(function (stylesheet) {
       styleObjects.push({ fileName: stylesheet.attributes.href.value, file: stylesheet, visible: true });
     });
@@ -40,16 +63,17 @@
   }
 
   function printCurrentStylesheets() {
-    stylesheetUL = document.querySelector('.my-ui ul.stylesheet-list');
+    stylesheetUL = d.querySelector('.my-ui ul.stylesheet-list');
+    stylesheetUL.innerHTML = '';
     styleObjects.forEach(function (style, index) {
-      var li = document.createElement('li');
+      var li = d.createElement('li');
       li.innerHTML = style.fileName;
       li.attributes.fileName = style.fileName;
       li.attributes.file = style.file;
       li.attributes.index = index;
       li.onclick = function (e) {
         style.visible = !style.visible;
-        style.visible ? addStyling(style) : removeStyling(style)
+        style.visible ? addStyling() : removeStyling(style)
       };
       stylesheetUL.appendChild(li)
     });
@@ -58,19 +82,19 @@
   }
 
   function removeStyling(style) {
-    document.head.removeChild(style.file);
+    d.head.removeChild(style.file);
   }
 
-  function addStyling(style) {
+  function addStyling() {
     styleObjects.forEach(function (s) {
       if (s.visible) {
-        document.head.appendChild(s.file);
+        d.head.appendChild(s.file);
       }
     });
   }
 
   function resetMyUICss() {
-    ui = document.querySelector('.my-ui');
+    ui = d.querySelector('.my-ui');
     [].slice.call(ui.getElementsByTagName('*'))
       .forEach(function (element) {
         element.style.margin = '0px';
@@ -81,6 +105,7 @@
         element.style.fontStyle = 'normal';
         element.style.border = '0';
         element.style.listStyleType = 'none';
+        element.style.display = 'block';
 
         if (element.tagName === 'LI') {
           element.style.cursor = 'pointer';
@@ -94,4 +119,4 @@
 
   initialize();
 
-})();
+})(window.document);
